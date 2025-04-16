@@ -39,7 +39,7 @@ func checkError(err error) (int, dto.ErrorResponse) {
 		return http.StatusBadRequest, dto.ErrorResponse{Message: "validation error", Details: details}
 
 	} else if errors.As(err, &appErr) {
-		return appErr.Code, dto.ErrorResponse{Message: appErr.Message}
+		return appErr.Code, dto.ErrorResponse{Message: appErr.ResponseMessage}
 
 	} else if errors.As(err, &unmarchalErrType) {
 		return http.StatusBadRequest, dto.ErrorResponse{Message: "unmarshal error"}
