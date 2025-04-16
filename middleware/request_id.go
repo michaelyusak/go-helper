@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/michaelyusak/go-helper/appconstant"
 
@@ -9,7 +12,10 @@ import (
 
 func RequestIdHandlerMiddleware(c *gin.Context) {
 	uuid := uuid.NewString()
-	c.Set(appconstant.RequestId, uuid)
+
+	requestId := fmt.Sprintf("%v:%s", time.Now().UnixMilli(), uuid)
+
+	c.Set(appconstant.RequestId, requestId)
 
 	c.Next()
 }
