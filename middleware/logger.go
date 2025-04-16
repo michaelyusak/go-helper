@@ -38,13 +38,25 @@ func Logger(log *logrus.Logger) func(c *gin.Context) {
 			"status_code": statusCode,
 		})
 
-		if statusCode >= 400 && statusCode <= 599 {
+		if statusCode >= 400 && statusCode <= 499 {
 			var appErr *apperror.AppError
 			for _, err := range c.Errors {
 				if errors.As(err, &appErr) {
 					entry.WithFields(logrus.Fields{
 						"app error": appErr,
-						"stack":     string(appErr.GetStackTrace()),
+					}).Warn()
+				} else {
+					entry.WithFields(logrus.Fields{
+						"error": err,
+					}).Warn()
+				}
+			}
+		} else if statusCode >= 500 && statusCode <= 599 {
+			var appErr *apperror.AppError
+			for _, err := range c.Errors {
+				if errors.As(err, &appErr) {
+					entry.WithFields(logrus.Fields{
+						"app error": appErr,
 					}).Error()
 				} else {
 					entry.WithFields(logrus.Fields{

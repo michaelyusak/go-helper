@@ -1,7 +1,6 @@
 package apperror
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -10,39 +9,61 @@ import (
 )
 
 type AppError struct {
-	Code    int
-	Err     error
-	Message string
-	stack   []byte
+	Code            int
+	Message         string
+	ResponseMessage string
+}
+
+type AppErrorOpt struct {
+	Code            int
+	Message         string
+	ResponseMessage string
 }
 
 func (ae AppError) Error() string {
-	return fmt.Sprintf("Error %d %s from: %s", ae.Code, ae.Message, ae.Err.Error())
+	return fmt.Sprintf("Code %d | Error: %s", ae.Code, ae.Message)
 }
 
-func (ae *AppError) GetStackTrace() []byte {
-	return ae.stack
-}
-
-func NewAppError(code int, err error, message string) *AppError {
+func NewAppError(code int, message string, responseMessage string) *AppError {
 	return &AppError{
-		Code:    code,
-		Err:     err,
-		Message: message,
-		stack:   debug.Stack(),
+		Code:            code,
+		Message:         message,
+		ResponseMessage: responseMessage,
 	}
 }
 
 func NotFoundError() *AppError {
-	err := errors.New(appconstant.MsgNotFound)
-
-	return NewAppError(http.StatusNotFound, err, appconstant.MsgNotFound)
+	return NewAppError(http.StatusNotFound, appconstant.MsgNotFound, appconstant.MsgNotFound)
 }
 
-func BadRequestError(err error) *AppError {
-	return NewAppError(http.StatusBadRequest, err, err.Error())
+func BadRequestError(opt AppErrorOpt) *AppError {
+	if opt.Message == "" {
+		opt.Message = fmt.Sprintf("Bad Request Error | Stack: %s", string(debug.Stack()))
+	}
+
+	if opt.ResponseMessage == "" {
+		opt.ResponseMessage = "bad request"
+	}
+
+	if opt.Code == 0 {
+		opt.Code = http.StatusBadRequest
+	}
+
+	return NewAppError(opt.Code, opt.Message, opt.ResponseMessage)
 }
 
-func InternalServerError(err error) *AppError {
-	return NewAppError(http.StatusInternalServerError, err, appconstant.MsgInternalServerError)
+func InternalServerError(opt AppErrorOpt) *AppError {
+	if opt.Message == "" {
+		opt.Message = fmt.Sprintf("Internal Server Error | Stack: %s", string(debug.Stack()))
+	}
+
+	if opt.ResponseMessage == "" {
+		opt.ResponseMessage = "internal server error"
+	}
+
+	if opt.Code == 0 {
+		opt.Code = http.StatusInternalServerError
+	}
+
+	return NewAppError(opt.Code, opt.Message, opt.ResponseMessage)
 }
