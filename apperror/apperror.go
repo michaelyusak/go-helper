@@ -67,3 +67,19 @@ func InternalServerError(opt AppErrorOpt) *AppError {
 
 	return NewAppError(opt)
 }
+
+func UnauthorizedError(opt AppErrorOpt) *AppError {
+	if opt.Message == "" {
+		opt.Message = fmt.Sprintf("Unauthorized Error | Stack: %s", string(debug.Stack()))
+	}
+
+	if opt.ResponseMessage == "" {
+		opt.ResponseMessage = "unauthorized"
+	}
+
+	if opt.Code == 0 {
+		opt.Code = http.StatusUnauthorized
+	}
+
+	return NewAppError(opt)
+}
