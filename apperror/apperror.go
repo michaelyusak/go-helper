@@ -24,16 +24,16 @@ func (ae AppError) Error() string {
 	return fmt.Sprintf("Code %d | Error: %s", ae.Code, ae.Message)
 }
 
-func NewAppError(code int, message string, responseMessage string) *AppError {
+func NewAppError(opt AppErrorOpt) *AppError {
 	return &AppError{
-		Code:            code,
-		Message:         message,
-		ResponseMessage: responseMessage,
+		Code:            opt.Code,
+		Message:         opt.Message,
+		ResponseMessage: opt.ResponseMessage,
 	}
 }
 
 func NotFoundError() *AppError {
-	return NewAppError(http.StatusNotFound, appconstant.MsgNotFound, appconstant.MsgNotFound)
+	return NewAppError(AppErrorOpt{Code: http.StatusNotFound, Message: appconstant.MsgNotFound, ResponseMessage: appconstant.MsgNotFound})
 }
 
 func BadRequestError(opt AppErrorOpt) *AppError {
@@ -49,7 +49,7 @@ func BadRequestError(opt AppErrorOpt) *AppError {
 		opt.Code = http.StatusBadRequest
 	}
 
-	return NewAppError(opt.Code, opt.Message, opt.ResponseMessage)
+	return NewAppError(opt)
 }
 
 func InternalServerError(opt AppErrorOpt) *AppError {
@@ -65,5 +65,5 @@ func InternalServerError(opt AppErrorOpt) *AppError {
 		opt.Code = http.StatusInternalServerError
 	}
 
-	return NewAppError(opt.Code, opt.Message, opt.ResponseMessage)
+	return NewAppError(opt)
 }
