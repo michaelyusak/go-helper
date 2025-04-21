@@ -21,7 +21,7 @@ type jwtHelperImpl struct {
 	issuer string
 }
 
-func NewJWTHelperImpl(config JwtConfig) *jwtHelperImpl {
+func NewJWTHelper(config JwtConfig) *jwtHelperImpl {
 	return &jwtHelperImpl{
 		key:    config.Key,
 		issuer: config.Issuer,
