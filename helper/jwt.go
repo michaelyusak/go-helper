@@ -7,8 +7,8 @@ import (
 )
 
 type JWTHelper interface {
-	CreateAndSign(customClaims any, expiredAt int64) (*string, error)
-	ParseAndVerify(signed string) (any, error)
+	CreateAndSign(customClaimBytes []byte, expiredAt int64) (*string, error) 
+	ParseAndVerify(signed string) ([]byte, error)
 }
 
 type JwtConfig struct {
@@ -21,7 +21,7 @@ type jwtHelperImpl struct {
 	issuer string
 }
 
-func NewJWTHelperImpl(config JwtConfig) *jwtHelperImpl {
+func NewJWTHelper(config JwtConfig) *jwtHelperImpl {
 	return &jwtHelperImpl{
 		key:    config.Key,
 		issuer: config.Issuer,
