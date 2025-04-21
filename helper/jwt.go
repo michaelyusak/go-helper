@@ -11,15 +11,20 @@ type JWTHelper interface {
 	ParseAndVerify(signed string) (any, error)
 }
 
+type JwtConfig struct {
+	Issuer string `json:"issuer"`
+	Key    string `json:"key"`
+}
+
 type jwtHelperImpl struct {
 	key    string
 	issuer string
 }
 
-func NewJWTHelperImpl(key, issuer string) *jwtHelperImpl {
+func NewJWTHelperImpl(config JwtConfig) *jwtHelperImpl {
 	return &jwtHelperImpl{
-		key:    key,
-		issuer: issuer,
+		key:    config.Key,
+		issuer: config.Issuer,
 	}
 }
 

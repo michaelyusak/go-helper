@@ -16,17 +16,17 @@ type HashConfig struct {
 }
 
 type hashHelperImpl struct {
-	config HashConfig
+	hashCost int
 }
 
-func NewHashHelperImpl(config HashConfig) *hashHelperImpl {
+func NewHashHelper(config HashConfig) *hashHelperImpl {
 	return &hashHelperImpl{
-		config: config,
+		hashCost: config.HashCost,
 	}
 }
 
 func (h *hashHelperImpl) Hash(str string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(str), h.config.HashCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(str), h.hashCost)
 	if err != nil {
 		return "", fmt.Errorf("[helper][hash][Hash][bcrypt.GenerateFromPassword] Error: %w", err)
 	}
