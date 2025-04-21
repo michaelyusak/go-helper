@@ -7,7 +7,7 @@ import (
 )
 
 type JWTHelper interface {
-	CreateAndSign(customClaimBytes []byte, expiredAt int64) (*string, error) 
+	CreateAndSign(customClaimBytes []byte, expiredAt int64) (string, error)
 	ParseAndVerify(signed string) ([]byte, error)
 }
 
@@ -28,7 +28,7 @@ func NewJWTHelper(config JwtConfig) *jwtHelperImpl {
 	}
 }
 
-func (h *jwtHelperImpl) CreateAndSign(customClaimBytes []byte, expiredAt int64) (*string, error) {
+func (h *jwtHelperImpl) CreateAndSign(customClaimBytes []byte, expiredAt int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
 		"iss":  h.issuer,
 		"exp":  expiredAt,
@@ -37,10 +37,10 @@ func (h *jwtHelperImpl) CreateAndSign(customClaimBytes []byte, expiredAt int64) 
 
 	signed, err := token.SignedString([]byte(h.key))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &signed, nil
+	return signed, nil
 }
 
 func (h *jwtHelperImpl) ParseAndVerify(signed string) ([]byte, error) {
