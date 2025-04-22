@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
@@ -9,6 +11,7 @@ import (
 type HashHelper interface {
 	Hash(str string) (string, error)
 	Check(str string, hash []byte) (bool, error)
+	HashSHA512(str string) string
 }
 
 type HashConfig struct {
@@ -30,6 +33,7 @@ func (h *hashHelperImpl) Hash(str string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("[helper][hash][Hash][bcrypt.GenerateFromPassword] Error: %w", err)
 	}
+
 	return string(hash), nil
 }
 
@@ -41,5 +45,12 @@ func (h *hashHelperImpl) Check(str string, hash []byte) (bool, error) {
 		}
 		return false, fmt.Errorf("[helper][hash][Check][bcrypt.CompareHashAndPassword] Error: %w", err)
 	}
+
 	return true, nil
+}
+
+func (h *hashHelperImpl) HashSHA512(str string) string {
+	hash := sha512.Sum512([]byte(str))
+
+	return hex.EncodeToString(hash[:])
 }
