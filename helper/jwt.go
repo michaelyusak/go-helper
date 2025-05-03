@@ -19,17 +19,19 @@ type JwtConfig struct {
 type jwtHelperImpl struct {
 	key    string
 	issuer string
+	method jwt.SigningMethod
 }
 
-func NewJWTHelper(config JwtConfig) *jwtHelperImpl {
+func NewJWTHelper(config JwtConfig, method jwt.SigningMethod) *jwtHelperImpl {
 	return &jwtHelperImpl{
 		key:    config.Key,
 		issuer: config.Issuer,
+		method: method,
 	}
 }
 
 func (h *jwtHelperImpl) CreateAndSign(customClaimBytes []byte, expiredAt int64) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
+	token := jwt.NewWithClaims(h.method, jwt.MapClaims{
 		"iss":  h.issuer,
 		"exp":  expiredAt,
 		"data": string(customClaimBytes),
@@ -46,7 +48,7 @@ func (h *jwtHelperImpl) CreateAndSign(customClaimBytes []byte, expiredAt int64) 
 func (h *jwtHelperImpl) ParseAndVerify(signed string) ([]byte, error) {
 	token, err := jwt.Parse(signed, func(token *jwt.Token) (interface{}, error) {
 		return []byte(h.key), nil
-	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
+	}, jwt.WithValidMethods([]string{h.method.Alg()}),
 		jwt.WithIssuer(h.issuer),
 		jwt.WithExpirationRequired(),
 	)
