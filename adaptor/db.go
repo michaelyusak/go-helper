@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/michaelyusak/go-helper/entity"
 )
 
