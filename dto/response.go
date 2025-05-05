@@ -16,5 +16,6 @@ type ValidationErrorDetails struct {
 }
 
 type GetHealthResponse struct {
-	Health string `json:"health"`
+	Healthy bool   `json:"healthy"`
+	Message string `json:"message"`
 }

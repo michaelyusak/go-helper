@@ -13,5 +13,5 @@ func ResponseOK(ctx *gin.Context, res any) {
 }
 
 func HealthOK(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, dto.GetHealthResponse{Health: appconstant.MsgOK})
+	ctx.JSON(http.StatusOK, dto.GetHealthResponse{Healthy: true, Message: appconstant.MsgOK})
 }
