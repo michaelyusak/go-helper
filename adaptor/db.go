@@ -34,11 +34,11 @@ func ConnectDB(dbType DBType, config entity.DBConfig) (*sql.DB, error) {
 
 	db, err := sql.Open(driver, dsn)
 	if err != nil {
-		return nil, fmt.Errorf("[adapter][ConnectDB][Open] error: %w", err)
+		return nil, fmt.Errorf("[adaptor][ConnectDB][Open] error: %w", err)
 	}
 
 	if err = db.Ping(); err != nil {
-		return nil, fmt.Errorf("[adapter][ConnectDB][Ping] error: %w", err)
+		return nil, fmt.Errorf("[adaptor][ConnectDB][Ping] error: %w", err)
 	}
 
 	return db, nil
