@@ -36,19 +36,19 @@ func checkError(err error) (int, dto.ErrorResponse) {
 
 	if errors.As(err, &ve) {
 		details := generateValidationErrors(ve)
-		return http.StatusBadRequest, dto.ErrorResponse{Message: "validation error", Details: details}
+		return http.StatusBadRequest, dto.ErrorResponse{Message: "validation error", StatusCode: http.StatusBadRequest, Details: details}
 
 	} else if errors.As(err, &appErr) {
-		return appErr.Code, dto.ErrorResponse{Message: appErr.ResponseMessage}
+		return appErr.Code, dto.ErrorResponse{Message: appErr.ResponseMessage, StatusCode: appErr.Code}
 
 	} else if errors.As(err, &unmarchalErrType) {
-		return http.StatusBadRequest, dto.ErrorResponse{Message: "unmarshal error"}
+		return http.StatusBadRequest, dto.ErrorResponse{Message: "unmarshal error", StatusCode: http.StatusBadRequest}
 
 	} else if errors.As(err, &jseErrType) {
-		return http.StatusBadRequest, dto.ErrorResponse{Message: "json syntax error"}
+		return http.StatusBadRequest, dto.ErrorResponse{Message: "json syntax error", StatusCode: http.StatusBadRequest}
 	}
 
-	return http.StatusInternalServerError, dto.ErrorResponse{Message: "internal error"}
+	return http.StatusInternalServerError, dto.ErrorResponse{Message: "internal error", StatusCode: http.StatusInternalServerError}
 }
 
 func getErrorMsg(fe validator.FieldError) string {
