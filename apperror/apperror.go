@@ -36,6 +36,11 @@ func NotFoundError() *AppError {
 	return NewAppError(AppErrorOpt{Code: http.StatusNotFound, Message: appconstant.MsgNotFound, ResponseMessage: appconstant.MsgNotFound})
 }
 
+func UnavailableError() *AppError {
+	msg := http.StatusText(http.StatusServiceUnavailable)
+	return NewAppError(AppErrorOpt{Code: http.StatusServiceUnavailable, Message: msg, ResponseMessage: msg})
+}
+
 func BadRequestError(opt AppErrorOpt) *AppError {
 	if opt.Message == "" {
 		opt.Message = fmt.Sprintf("Bad Request Error | Stack: %s", string(debug.Stack()))
