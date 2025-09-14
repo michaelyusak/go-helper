@@ -1,13 +1,17 @@
 package dto
 
 type Response struct {
-	Message string `json:"message"`
-	Data    any    `json:"data,omitempty"`
+	StatusCode int    `json:"status_code"`
+	Success    bool   `json:"success"`
+	Message    string `json:"message"`
+	Data       any    `json:"data,omitempty"`
 }
 
 type ErrorResponse struct {
-	Message string                   `json:"message"`
-	Details []ValidationErrorDetails `json:"details,omitempty"`
+	StatusCode int                      `json:"status_code"`
+	Success    bool                     `json:"success"`
+	Message    string                   `json:"message"`
+	Details    []ValidationErrorDetails `json:"details,omitempty"`
 }
 
 type ValidationErrorDetails struct {
