@@ -1,8 +1,11 @@
 package helper
 
 import (
+	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 )
 
 var (
@@ -47,4 +50,19 @@ func FileTypeAllowed(fileHeader *multipart.FileHeader, allowed map[string]bool) 
 	}
 
 	return true, contentType, nil
+}
+
+func CopySourceToFile(fileName string, source io.Reader) error {
+	out, err := os.Create(fileName)
+	if err != nil {
+		return fmt.Errorf("[go-helper][SaveFile][os.Create] Failed to create dest file: %w", err)
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, source)
+	if err != nil {
+		return fmt.Errorf("[go-helper][SaveFile][io.Copy] Failed to copy source to file: %w", err)
+	}
+
+	return  nil
 }
