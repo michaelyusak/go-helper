@@ -31,7 +31,7 @@ func FileTypeAllowed(fileHeader *multipart.FileHeader, allowed map[string]bool) 
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		return false, "", err
+		return false, "", fmt.Errorf("[go-helper][FileTypeAllowed][fileHeader.Open] Failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -39,7 +39,7 @@ func FileTypeAllowed(fileHeader *multipart.FileHeader, allowed map[string]bool) 
 	buf := make([]byte, 512)
 	_, err = file.Read(buf)
 	if err != nil {
-		return false, "", err
+		return false, "", fmt.Errorf("[go-helper][FileTypeAllowed][file.Read] Failed to read from file: %w", err)
 	}
 
 	// Detect content type
