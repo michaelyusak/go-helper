@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -38,7 +39,10 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, referer strin
 
 	deviceId := m.hash.HashSHA512(fmt.Sprintf("%s:%s:%s", ipAddress, userAgent, referer))
 
-	c.Set(appconstant.DeviceIdKey, deviceId)
+	c.Set(string(appconstant.DeviceIdKey), deviceId)
+
+	ctx := context.WithValue(c.Request.Context(), appconstant.DeviceIdKey, deviceId)
+	c.Request = c.Request.WithContext(ctx)
 }
 
 func (m *auth) Auth() func(c *gin.Context) {
