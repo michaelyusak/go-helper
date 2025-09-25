@@ -1,11 +1,13 @@
 package adaptor
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/michaelyusak/go-helper/entity"
 )
 
@@ -22,11 +24,11 @@ func ConnectDB(dbType DBType, config entity.DBConfig) (*sql.DB, error) {
 	switch dbType {
 	case MYSQL:
 		driver = "mysql"
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?timeout=5s&readTimeout=5s&writeTimeout=5s",
 			config.Username, config.Password, config.Host, config.Port, config.DbName)
 	case PSQL:
 		driver = "pgx"
-		dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?connect_timeout=5",
 			config.Username, config.Password, config.Host, config.Port, config.DbName)
 	default:
 		return nil, fmt.Errorf("unsupported DB type: %s", dbType)
@@ -37,7 +39,10 @@ func ConnectDB(dbType DBType, config entity.DBConfig) (*sql.DB, error) {
 		return nil, fmt.Errorf("[adapter][ConnectDB][Open] error: %w", err)
 	}
 
-	if err = db.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err = db.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("[adapter][ConnectDB][Ping] error: %w", err)
 	}
 
