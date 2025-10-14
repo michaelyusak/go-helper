@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/smtp"
+
+	"github.com/michaelyusak/go-helper/entity"
 )
 
 type SmtpHelper struct {
@@ -15,21 +17,13 @@ type SmtpHelper struct {
 	identity string
 }
 
-type SmtpHelperOpts struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Identity string
-}
-
-func NewSmptpHelper(opt SmtpHelperOpts) *SmtpHelper {
+func NewSmptpHelper(config entity.SmtpHelperConfig) *SmtpHelper {
 	return &SmtpHelper{
-		host:     opt.Host,
-		port:     opt.Port,
-		username: opt.Username,
-		password: opt.Password,
-		identity: opt.Identity,
+		host:     config.Host,
+		port:     config.Port,
+		username: config.Username,
+		password: config.Password,
+		identity: config.Identity,
 	}
 }
 
