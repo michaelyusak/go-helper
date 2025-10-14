@@ -7,7 +7,7 @@ import (
 	"net/smtp"
 )
 
-type smtpHelper struct {
+type SmtpHelper struct {
 	host     string
 	port     string
 	username string
@@ -23,8 +23,8 @@ type SmtpHelperOpts struct {
 	Identity string
 }
 
-func NewSmptpHelper(opt SmtpHelperOpts) *smtpHelper {
-	return &smtpHelper{
+func NewSmptpHelper(opt SmtpHelperOpts) *SmtpHelper {
+	return &SmtpHelper{
 		host:     opt.Host,
 		port:     opt.Port,
 		username: opt.Username,
@@ -34,7 +34,7 @@ func NewSmptpHelper(opt SmtpHelperOpts) *smtpHelper {
 }
 
 type smtpRequest struct {
-	helper *smtpHelper
+	helper *SmtpHelper
 
 	username   string
 	recipients []string
@@ -42,7 +42,7 @@ type smtpRequest struct {
 	body       string
 }
 
-func (h *smtpHelper) NewRequest(to []string, subject string) *smtpRequest {
+func (h *SmtpHelper) NewRequest(to []string, subject string) *smtpRequest {
 	return &smtpRequest{
 		helper: h,
 
