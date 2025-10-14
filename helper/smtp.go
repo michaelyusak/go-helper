@@ -52,22 +52,22 @@ func (h *SmtpHelper) NewRequest(to []string, subject string) *smtpRequest {
 	}
 }
 
-func (r *smtpRequest) SetBody(emailTemplate string, data any) error {
+func (r *smtpRequest) SetBody(emailTemplate string, data any) (*smtpRequest, error) {
 	t, err := template.New("emailTemplate").Parse(emailTemplate)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	buf := new(bytes.Buffer)
 
 	err = t.Execute(buf, data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	r.body = buf.String()
 
-	return nil
+	return r, nil
 }
 
 func (r *smtpRequest) Send() error {
