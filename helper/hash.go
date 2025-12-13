@@ -11,7 +11,6 @@ import (
 type HashHelper interface {
 	Hash(str string) (string, error)
 	Check(str string, hash []byte) (bool, error)
-	HashSHA512(str string) string
 }
 
 type HashConfig struct {
@@ -49,7 +48,7 @@ func (h *hashHelperImpl) Check(str string, hash []byte) (bool, error) {
 	return true, nil
 }
 
-func (h *hashHelperImpl) HashSHA512(str string) string {
+func HashSHA512(str string) string {
 	hash := sha512.Sum512([]byte(str))
 
 	return hex.EncodeToString(hash[:])

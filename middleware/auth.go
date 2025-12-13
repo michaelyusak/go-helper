@@ -37,7 +37,7 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, referer strin
 		return
 	}
 
-	deviceId := m.hash.HashSHA512(fmt.Sprintf("%s:%s:%s", ipAddress, userAgent, referer))
+	deviceId := helper.HashSHA512(fmt.Sprintf("%s:%s:%s", ipAddress, userAgent, referer))
 
 	c.Set(string(appconstant.DeviceIdKey), deviceId)
 
