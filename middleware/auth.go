@@ -51,6 +51,7 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo st
 		appconstant.DeviceHashKey: deviceHash,
 		appconstant.UserAgentKey:  userAgent,
 		appconstant.IpAddressKey:  ipAddress,
+		appconstant.DeviceInfokey: deviceInfo,
 	})
 
 	c.Request = c.Request.WithContext(ctx)

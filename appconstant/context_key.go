@@ -16,6 +16,7 @@ const (
 	NameKey         ContextKey = "name"
 	UserAgentKey    ContextKey = "user_agent"
 	IpAddressKey    ContextKey = "ip_adress"
+	DeviceInfokey   ContextKey = "device_info"
 
 	// HTTP Header Key
 	Authorization  = "Authorization"
