@@ -6,10 +6,17 @@ const (
 	RequestId = "request-id"
 
 	// Auth
-	Bearer                 = "Bearer"
-	DeviceIdKey ContextKey = "device_id"
+	Bearer                     = "Bearer"
+	DeviceIdKey     ContextKey = "device_id"
+	AccessTokenKey  ContextKey = "access_token"
+	RefreshTokenKey ContextKey = "refresh_token"
+	AccountIdKey    ContextKey = "account_id"
+	DeviceHashKey   ContextKey = "device_hash_key"
+	EmailKey        ContextKey = "email"
+	NameKey         ContextKey = "name"
 
 	// HTTP Header Key
 	Authorization  = "Authorization"
 	CfConnectingIp = "CF-Connecting-IP"
+	DeviceInfo     = "Device-Info"
 )

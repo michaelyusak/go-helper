@@ -1,9 +1,8 @@
 package middleware
 
 import (
-	"context"
-	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -13,36 +12,48 @@ import (
 )
 
 type AuthOpt struct {
-	IsCheckDeviceId bool
-
-	Hash helper.HashHelper
+	IsCheckDeviceId   bool
+	AllowedDeviceInfo []string
+	AllowedIpAddress  []string
 }
 
 type auth struct {
-	isCheckDeviceId bool
+	isCheckDeviceId   bool
+	allowedDeviceInfo []string
+	allowedIpAddress  []string
 
 	hash helper.HashHelper
 }
 
 func NewAuth(opt AuthOpt) *auth {
 	return &auth{
-		isCheckDeviceId: opt.IsCheckDeviceId,
-		hash:            opt.Hash,
+		isCheckDeviceId:   opt.IsCheckDeviceId,
+		allowedDeviceInfo: opt.AllowedDeviceInfo,
 	}
 }
 
-func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, referer string) {
-	if ipAddress == "" || userAgent == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{Message: appconstant.MsgUnauthorized})
-		return
+func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo string) bool {
+	if ipAddress == "" || userAgent == "" || deviceInfo == "" {
+		return false
 	}
 
-	deviceId := helper.HashSHA512(fmt.Sprintf("%s:%s:%s", ipAddress, userAgent, referer))
+	if len(m.allowedIpAddress) > 0 || !slices.Contains(m.allowedIpAddress, ipAddress) {
+		return false
+	}
 
-	c.Set(string(appconstant.DeviceIdKey), deviceId)
+	if len(m.allowedDeviceInfo) > 0 || !slices.Contains(m.allowedDeviceInfo, deviceInfo) {
+		return false
+	}
 
-	ctx := context.WithValue(c.Request.Context(), appconstant.DeviceIdKey, deviceId)
+	deviceHash := helper.GenerateDeviceHash(ipAddress, userAgent, deviceInfo)
+
+	ctx := helper.InjectValues(c.Request.Context(), map[appconstant.ContextKey]any{
+		appconstant.DeviceIdKey: deviceHash,
+	})
+
 	c.Request = c.Request.WithContext(ctx)
+
+	return true
 }
 
 func (m *auth) Auth() func(c *gin.Context) {
@@ -53,7 +64,11 @@ func (m *auth) Auth() func(c *gin.Context) {
 		}
 
 		if m.isCheckDeviceId {
-			m.checkDeviceId(c, ipAddress, c.Request.UserAgent(), c.Request.Referer())
+			passed := m.checkDeviceId(c, ipAddress, c.Request.UserAgent(), c.Request.Header.Get(appconstant.DeviceInfo))
+			if !passed {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{Message: appconstant.MsgUnauthorized})
+				return
+			}
 		}
 
 		c.Next()
