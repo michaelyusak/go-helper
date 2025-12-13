@@ -6,25 +6,25 @@ import (
 	"github.com/michaelyusak/go-helper/helper"
 )
 
-type CommonHandler struct {
+type Common struct {
 	appHealthy *bool
 }
 
-func NewCommonHandler(appHealthy *bool) *CommonHandler {
-	return &CommonHandler{
+func NewCommon(appHealthy *bool) *Common {
+	return &Common{
 		appHealthy: appHealthy,
 	}
 }
 
-func (h *CommonHandler) Ping(ctx *gin.Context) {
+func (h *Common) Ping(ctx *gin.Context) {
 	helper.ResponseOK(ctx, "ok")
 }
 
-func (h *CommonHandler) NoRoute(ctx *gin.Context) {
+func (h *Common) NoRoute(ctx *gin.Context) {
 	ctx.Error(apperror.NotFoundError())
 }
 
-func (h *CommonHandler) Health(ctx *gin.Context) {
+func (h *Common) Health(ctx *gin.Context) {
 	if !*h.appHealthy {
 		ctx.Error(apperror.UnavailableError())
 		return
