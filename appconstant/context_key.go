@@ -14,6 +14,8 @@ const (
 	DeviceHashKey   ContextKey = "device_hash_key"
 	EmailKey        ContextKey = "email"
 	NameKey         ContextKey = "name"
+	UserAgentKey    ContextKey = "user_agent"
+	IpAddressKey    ContextKey = "ip_adress"
 
 	// HTTP Header Key
 	Authorization  = "Authorization"
