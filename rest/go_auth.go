@@ -31,7 +31,7 @@ func NewGoAuthRepo(opt GoAuthRepoOpt) *goAuthRepo {
 }
 
 func (r *goAuthRepo) ValidateToken(ctx context.Context, token string) (entity.JwtCustomClaims, error) {
-	validateTokenRes := dto.Response{}
+	validateTokenRes := dto.Response[entity.JwtCustomClaims]{}
 
 	resp, err := r.client.R().
 		SetAuthToken(token).
@@ -47,10 +47,5 @@ func (r *goAuthRepo) ValidateToken(ctx context.Context, token string) (entity.Jw
 		return entity.JwtCustomClaims{}, fmt.Errorf("[goAuthRestRepo][resp.IsError] Error Response [status_code: %v][resp: %s]", resp.StatusCode(), string(resp.Body()))
 	}
 
-	customClaims, ok := validateTokenRes.Data.(entity.JwtCustomClaims)
-	if !ok {
-		return entity.JwtCustomClaims{}, fmt.Errorf("unexpected response")
-	}
-
-	return customClaims, nil
+	return validateTokenRes.Data, nil
 }
