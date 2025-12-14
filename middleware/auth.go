@@ -37,11 +37,11 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo st
 		return false
 	}
 
-	if len(m.allowedIpAddress) > 0 || !slices.Contains(m.allowedIpAddress, ipAddress) {
+	if len(m.allowedIpAddress) > 0 && !slices.Contains(m.allowedIpAddress, ipAddress) {
 		return false
 	}
 
-	if len(m.allowedDeviceInfo) > 0 || !slices.Contains(m.allowedDeviceInfo, deviceInfo) {
+	if len(m.allowedDeviceInfo) > 0 && !slices.Contains(m.allowedDeviceInfo, deviceInfo) {
 		return false
 	}
 
