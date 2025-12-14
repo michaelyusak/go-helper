@@ -9,7 +9,7 @@ import (
 )
 
 func ResponseOK(ctx *gin.Context, res any) {
-	ctx.JSON(http.StatusOK, dto.Response{Message: appconstant.MsgOK, Success: true, StatusCode: http.StatusOK, Data: res})
+	ctx.JSON(http.StatusOK, dto.Response[any]{Message: appconstant.MsgOK, Success: true, StatusCode: http.StatusOK, Data: res})
 }
 
 func HealthOK(ctx *gin.Context) {
