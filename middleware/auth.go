@@ -21,7 +21,8 @@ type AuthOpt struct {
 	AllowedDeviceInfo []string
 	AllowedIpAddress  []string
 
-	GoAuthBaseUrl string
+	AuthEngineBaseUrl        string
+	AuthEngineCallerIdentity string
 }
 
 type auth struct {
@@ -31,7 +32,7 @@ type auth struct {
 	allowedDeviceInfo []string
 	allowedIpAddress  []string
 
-	goAuthRestClient rest.AuthRepo
+	authEngineRestClient rest.AuthRepo
 }
 
 func NewAuth(opt AuthOpt) *auth {
@@ -42,7 +43,10 @@ func NewAuth(opt AuthOpt) *auth {
 		allowedDeviceInfo: opt.AllowedDeviceInfo,
 		allowedIpAddress:  opt.AllowedIpAddress,
 
-		goAuthRestClient: rest.NewGoAuthRepo(rest.GoAuthRepoOpt{BaseUrl: opt.GoAuthBaseUrl}),
+		authEngineRestClient: rest.NewGoAuthRepo(rest.GoAuthRepoOpt{
+			BaseUrl:  opt.AuthEngineBaseUrl,
+			Identity: opt.AuthEngineCallerIdentity,
+		}),
 	}
 }
 
@@ -99,9 +103,9 @@ func (m *auth) checkToken(c *gin.Context, isCheckToken bool) *apperror.AppError 
 		return nil
 	}
 
-	customClaims, err := m.goAuthRestClient.ValidateToken(c.Request.Context(), token)
+	customClaims, err := m.authEngineRestClient.ValidateToken(c.Request.Context(), token)
 	if err != nil {
-		logrus.WithError(err).Error("[authMiddleware][checkToken][goAuthRestClient.ValidateToken] Error")
+		logrus.WithError(err).Error("[authMiddleware][checkToken][authEngineRestClient.ValidateToken] Error")
 		return apperror.InternalServerError(apperror.AppErrorOpt{})
 	}
 
