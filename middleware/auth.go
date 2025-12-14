@@ -21,8 +21,7 @@ type AuthOpt struct {
 	AllowedDeviceInfo []string
 	AllowedIpAddress  []string
 
-	AuthEngineBaseUrl        string
-	AuthEngineCallerIdentity string
+	AuthEngineBaseUrl string
 }
 
 type auth struct {
@@ -44,8 +43,7 @@ func NewAuth(opt AuthOpt) *auth {
 		allowedIpAddress:  opt.AllowedIpAddress,
 
 		authEngineRestClient: rest.NewGoAuthRepo(rest.GoAuthRepoOpt{
-			BaseUrl:  opt.AuthEngineBaseUrl,
-			Identity: opt.AuthEngineCallerIdentity,
+			BaseUrl: opt.AuthEngineBaseUrl,
 		}),
 	}
 }

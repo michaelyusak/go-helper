@@ -22,4 +22,6 @@ const (
 	Authorization  = "Authorization"
 	CfConnectingIp = "CF-Connecting-IP"
 	DeviceInfo     = "Device-Info"
+	UserAgent      = "User-Agent"
+	ClientIp       = "X-Client-IP"
 )
