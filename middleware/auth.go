@@ -7,28 +7,42 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/michaelyusak/go-helper/appconstant"
+	"github.com/michaelyusak/go-helper/apperror"
 	"github.com/michaelyusak/go-helper/dto"
 	"github.com/michaelyusak/go-helper/helper"
+	"github.com/michaelyusak/go-helper/rest"
+	"github.com/sirupsen/logrus"
 )
 
 type AuthOpt struct {
-	IsCheckDeviceId   bool
+	IsCheckDeviceId    bool
+	IsCheckAccessToken bool
+
 	AllowedDeviceInfo []string
 	AllowedIpAddress  []string
+
+	GoAuthBaseUrl string
 }
 
 type auth struct {
-	isCheckDeviceId   bool
+	isCheckDeviceId    bool
+	isCheckAccessToken bool
+
 	allowedDeviceInfo []string
 	allowedIpAddress  []string
 
-	hash helper.HashHelper
+	goAuthRestClient rest.AuthRepo
 }
 
 func NewAuth(opt AuthOpt) *auth {
 	return &auth{
-		isCheckDeviceId:   opt.IsCheckDeviceId,
+		isCheckDeviceId:    opt.IsCheckDeviceId,
+		isCheckAccessToken: opt.IsCheckAccessToken,
+
 		allowedDeviceInfo: opt.AllowedDeviceInfo,
+		allowedIpAddress:  opt.AllowedIpAddress,
+
+		goAuthRestClient: rest.NewGoAuthRepo(rest.GoAuthRepoOpt{BaseUrl: opt.GoAuthBaseUrl}),
 	}
 }
 
@@ -59,6 +73,49 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo st
 	return true
 }
 
+func (m *auth) checkToken(c *gin.Context, isCheckToken bool) *apperror.AppError {
+	authorization := c.Request.Header.Get(appconstant.Authorization)
+	if authorization == "" && isCheckToken {
+		return apperror.UnauthorizedError(apperror.AppErrorOpt{})
+	}
+
+	var token string
+
+	if authorization != "" {
+		split := strings.Split(authorization, " ")
+		if len(split) != 2 || split[0] != appconstant.Bearer {
+			return apperror.UnauthorizedError(apperror.AppErrorOpt{})
+		}
+
+		token = split[1]
+	}
+
+	ctx := helper.InjectValues(c.Request.Context(), map[appconstant.ContextKey]any{
+		appconstant.AccessTokenKey: token,
+	})
+	c.Request = c.Request.WithContext(ctx)
+
+	if !isCheckToken {
+		return nil
+	}
+
+	customClaims, err := m.goAuthRestClient.ValidateToken(c.Request.Context(), token)
+	if err != nil {
+		logrus.WithError(err).Error("[authMiddleware][checkToken][goAuthRestClient.ValidateToken] Error")
+		return apperror.InternalServerError(apperror.AppErrorOpt{})
+	}
+
+	ctx = helper.InjectValues(c.Request.Context(), map[appconstant.ContextKey]any{
+		appconstant.AccountIdKey: customClaims.AccountId,
+		appconstant.DeviceIdKey:  customClaims.DeviceId,
+		appconstant.EmailKey:     customClaims.Email,
+		appconstant.NameKey:      customClaims.Name,
+	})
+	c.Request = c.Request.WithContext(ctx)
+
+	return nil
+}
+
 func (m *auth) Auth() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		ipAddress := strings.TrimSpace(c.Request.Header.Get(appconstant.CfConnectingIp))
@@ -72,6 +129,12 @@ func (m *auth) Auth() func(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{Message: appconstant.MsgUnauthorized})
 				return
 			}
+		}
+
+		err := m.checkToken(c, m.isCheckAccessToken)
+		if err != nil {
+			c.AbortWithStatusJSON(err.Code, dto.ErrorResponse{Message: err.ResponseMessage})
+			return
 		}
 
 		c.Next()
