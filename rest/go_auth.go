@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/michaelyusak/go-helper/appconstant"
 	"github.com/michaelyusak/go-helper/dto"
 	"github.com/michaelyusak/go-helper/entity"
 )
@@ -14,12 +15,14 @@ type AuthRepo interface {
 }
 
 type GoAuthRepoOpt struct {
-	BaseUrl string
+	BaseUrl  string
+	Identity string
 }
 
 type goAuthRepo struct {
-	baseUrl string
-	client  *resty.Client
+	baseUrl  string
+	identity string
+	client   *resty.Client
 }
 
 func NewGoAuthRepo(opt GoAuthRepoOpt) *goAuthRepo {
@@ -34,6 +37,7 @@ func (r *goAuthRepo) ValidateToken(ctx context.Context, token string) (entity.Jw
 
 	resp, err := r.client.R().
 		SetAuthToken(token).
+		SetHeader(appconstant.DeviceInfo, r.identity).
 		SetResult(&validateTokenRes).
 		SetError(&validateTokenRes).
 		Post(r.baseUrl + "/v1/auth/validate-token")
