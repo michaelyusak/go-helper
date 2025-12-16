@@ -2,6 +2,8 @@ package helper
 
 import (
 	"bytes"
+	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -95,4 +97,43 @@ func CopySourceToFile(fileName string, source io.Reader) error {
 	}
 
 	return nil
+}
+
+func ReadCSVFromUpload(file multipart.File) ([]string, [][]string, error) {
+	reader := csv.NewReader(file)
+	reader.TrimLeadingSpace = true
+	reader.FieldsPerRecord = -1
+
+	header := []string{}
+	lines := [][]string{}
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if header == nil {
+			header = append([]string{}, record...)
+			continue
+		}
+
+		if len(record) != len(header) {
+			return nil, nil, fmt.Errorf(
+				"invalid column count: got %d, want %d",
+				len(record), len(header),
+			)
+		}
+
+		lines = append(lines, record)
+	}
+
+	if len(header) == 0 {
+		return nil, nil, errors.New("csv has no header")
+	}
+
+	return header, lines, nil
 }
