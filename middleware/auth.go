@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 	"strings"
@@ -101,10 +102,14 @@ func (m *auth) checkToken(c *gin.Context, isCheckToken bool) *apperror.AppError 
 		return nil
 	}
 
-	customClaims, err := m.authEngineRestClient.ValidateToken(c.Request.Context(), token)
+	customClaims, statusCode, err := m.authEngineRestClient.ValidateToken(c.Request.Context(), token)
 	if err != nil {
 		logrus.WithError(err).Error("[authMiddleware][checkToken][authEngineRestClient.ValidateToken] Error")
-		return apperror.InternalServerError(apperror.AppErrorOpt{})
+		return apperror.NewAppError(apperror.AppErrorOpt{
+			Code: statusCode,
+			ResponseMessage: http.StatusText(statusCode),
+			Message: fmt.Sprintf("[authMiddleware][checkToken][authEngineRestClient.ValidateToken] Error: %v", err),
+		})
 	}
 
 	ctx = helper.InjectValues(c.Request.Context(), map[appconstant.ContextKey]any{
