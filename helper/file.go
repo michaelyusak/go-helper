@@ -81,7 +81,7 @@ func LooksLikeCSV(b []byte) bool {
 	if len(lines) < 2 {
 		return false
 	}
-	return strings.Contains(lines[0], ",")
+	return strings.Contains(lines[0], ",") || strings.Contains(lines[0], ";")
 }
 
 func CopySourceToFile(fileName string, source io.Reader) error {
@@ -99,10 +99,44 @@ func CopySourceToFile(fileName string, source io.Reader) error {
 	return nil
 }
 
-func ReadCSVFromUpload(file multipart.File) ([]string, [][]string, error) {
+func NewCSVReader(file multipart.File) (*csv.Reader, error) {
+	buf := make([]byte, 1024)
+	n, err := file.Read(buf)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+
+	if seeker, ok := file.(io.Seeker); ok {
+		_, _ = seeker.Seek(0, io.SeekStart)
+	}
+
+	line := string(buf[:n])
+	firstLine := strings.SplitN(line, "\n", 2)[0]
+
+	if strings.TrimSpace(firstLine) == "" {
+		return nil, fmt.Errorf("empty or invalid CSV file")
+	}
+
 	reader := csv.NewReader(file)
 	reader.TrimLeadingSpace = true
 	reader.FieldsPerRecord = -1
+	reader.LazyQuotes = true
+
+	switch {
+	case strings.Count(firstLine, ";") > strings.Count(firstLine, ","):
+		reader.Comma = ';'
+	default:
+		reader.Comma = ','
+	}
+
+	return reader, nil
+}
+
+func ReadCSVFromUpload(file multipart.File) ([]string, [][]string, error) {
+	reader, err := NewCSVReader(file)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	header := []string{}
 	lines := [][]string{}
@@ -116,7 +150,7 @@ func ReadCSVFromUpload(file multipart.File) ([]string, [][]string, error) {
 			return nil, nil, err
 		}
 
-		if header == nil {
+		if len(header) == 0 {
 			header = append([]string{}, record...)
 			continue
 		}
