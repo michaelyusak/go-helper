@@ -81,7 +81,7 @@ func LooksLikeCSV(b []byte) bool {
 	if len(lines) < 2 {
 		return false
 	}
-	return strings.Contains(lines[0], ",")
+	return strings.Contains(lines[0], ",") || strings.Contains(lines[0], ";")
 }
 
 func CopySourceToFile(fileName string, source io.Reader) error {
@@ -99,10 +99,11 @@ func CopySourceToFile(fileName string, source io.Reader) error {
 	return nil
 }
 
-func ReadCSVFromUpload(file multipart.File) ([]string, [][]string, error) {
+func ReadCSVFromUpload(file multipart.File, separator rune) ([]string, [][]string, error) {
 	reader := csv.NewReader(file)
 	reader.TrimLeadingSpace = true
 	reader.FieldsPerRecord = -1
+	reader.Comma = separator
 
 	header := []string{}
 	lines := [][]string{}
