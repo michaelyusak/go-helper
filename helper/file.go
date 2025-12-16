@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -56,20 +57,18 @@ func FileTypeAllowed(fileHeader *multipart.FileHeader, allowed map[string]bool) 
 		_, _ = seeker.Seek(0, io.SeekStart)
 	}
 
-	if !allowed[contentType] {
-		return false, contentType, nil
-	}
-
 	if contentType == "image/svg+xml" {
 		if bytes.Contains(buf, []byte("<script")) {
 			return false, contentType, nil
 		}
 	}
 
-	if contentType == "text/plain; charset=utf-8" {
-		if LooksLikeCSV(buf) && allowed["text/csv"] {
-			return true, "text/csv", nil
-		}
+	if contentType == "text/plain; charset=utf-8" && LooksLikeCSV(buf) {
+		contentType = "text/csv"
+	}
+
+	if !allowed[contentType] {
+		return false, contentType, nil
 	}
 
 	return true, contentType, nil
@@ -170,4 +169,55 @@ func ReadCSVFromUpload(file multipart.File) ([]string, [][]string, error) {
 	}
 
 	return header, lines, nil
+}
+
+func MultipartFromFilePath(fieldName, filePath string) (*multipart.FileHeader, multipart.File, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	stat, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, nil, err
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	part, err := writer.CreateFormFile(fieldName, filepath.Base(filePath))
+	if err != nil {
+		file.Close()
+		return nil, nil, err
+	}
+
+	if _, err := io.Copy(part, file); err != nil {
+		file.Close()
+		return nil, nil, err
+	}
+
+	file.Close()
+	writer.Close()
+
+	reader := multipart.NewReader(body, writer.Boundary())
+
+	form, err := reader.ReadForm(stat.Size())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	headers := form.File[fieldName]
+	if len(headers) == 0 {
+		return nil, nil, errors.New("no file in multipart form")
+	}
+
+	fh := headers[0]
+
+	f, err := fh.Open()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return fh, f, nil
 }
