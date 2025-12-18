@@ -63,10 +63,10 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo, x
 	}
 
 	ctx := helper.InjectValues(c.Request.Context(), map[appconstant.ContextKey]any{
-		appconstant.UserAgentKey:  userAgent,
-		appconstant.IpAddressKey:  ipAddress,
-		appconstant.DeviceInfokey: deviceInfo,
-		appconstant.XDeviceIdKey:  xDeviceId,
+		appconstant.UserAgentKey:      userAgent,
+		appconstant.IpAddressKey:      ipAddress,
+		appconstant.DeviceInfokey:     deviceInfo,
+		appconstant.UniqueDeviceIdKey: xDeviceId,
 	})
 
 	c.Request = c.Request.WithContext(ctx)

@@ -7,10 +7,9 @@ import (
 	"github.com/michaelyusak/go-helper/appconstant"
 )
 
-func GenerateDeviceHash(ctx context.Context) string {
+func GenerateDeviceHash(ctx context.Context, accountId int64) string {
 	deviceInfo := ctx.Value(appconstant.DeviceInfokey).(string)
-	deviceId := ctx.Value(appconstant.XDeviceIdKey).(string)
-	accountId := ctx.Value(appconstant.AccountIdKey).(int64)
+	uniqueDeviceId := ctx.Value(appconstant.UniqueDeviceIdKey).(string)
 
-	return HashSHA512(fmt.Sprintf("%v:%s:%s", accountId, deviceInfo, deviceId))
+	return HashSHA512(fmt.Sprintf("%v:%s:%s", accountId, deviceInfo, uniqueDeviceId))
 }
