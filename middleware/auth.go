@@ -138,7 +138,8 @@ func (m *auth) Auth() func(c *gin.Context) {
 
 		err := m.checkToken(c, m.isCheckAccessToken)
 		if err != nil {
-			c.AbortWithStatusJSON(err.Code, dto.ErrorResponse{Message: err.ResponseMessage})
+			logrus.WithError(err).Warn("[authMiddleware][checkToken]")
+			c.AbortWithStatusJSON(err.Code, dto.ErrorResponse{StatusCode: err.Code, Message: err.ResponseMessage})
 			return
 		}
 

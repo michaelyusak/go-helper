@@ -44,7 +44,7 @@ func (r *goAuthRepo) ValidateToken(ctx context.Context, token string) (entity.Jw
 		return entity.JwtCustomClaims{}, http.StatusInternalServerError, err
 	}
 
-	if resp.IsError() || validateTokenRes.StatusCode >= http.StatusBadRequest {
+	if resp.IsError() || resp.StatusCode() >= http.StatusBadRequest {
 		return entity.JwtCustomClaims{}, resp.StatusCode(), fmt.Errorf("[goAuthRestRepo][resp.IsError] Error Response [status_code: %v][resp: %s]", resp.StatusCode(), string(resp.Body()))
 	}
 
