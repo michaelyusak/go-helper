@@ -9,8 +9,8 @@ import (
 
 func GenerateDeviceHash(ctx context.Context) string {
 	deviceInfo := ctx.Value(appconstant.DeviceInfokey).(string)
-	deviceId := ctx.Value(appconstant.XDeviceIdKey).(string)
+	uniqueDeviceId := ctx.Value(appconstant.UniqueDeviceIdKey).(string)
 	accountId := ctx.Value(appconstant.AccountIdKey).(int64)
 
-	return HashSHA512(fmt.Sprintf("%v:%s:%s", accountId, deviceInfo, deviceId))
+	return HashSHA512(fmt.Sprintf("%v:%s:%s", accountId, deviceInfo, uniqueDeviceId))
 }
