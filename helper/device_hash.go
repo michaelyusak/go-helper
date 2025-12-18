@@ -1,7 +1,16 @@
 package helper
 
-import "fmt"
+import (
+	"context"
+	"fmt"
 
-func GenerateDeviceHash(ipAddress, userAgent, deviceInfo string) string {
-	return HashSHA512(fmt.Sprintf("%s:%s:%s", ipAddress, userAgent, deviceInfo))
+	"github.com/michaelyusak/go-helper/appconstant"
+)
+
+func GenerateDeviceHash(ctx context.Context) string {
+	deviceInfo := ctx.Value(appconstant.DeviceInfokey).(string)
+	deviceId := ctx.Value(appconstant.XDeviceIdKey).(string)
+	accountId := ctx.Value(appconstant.AccountIdKey).(int64)
+
+	return HashSHA512(fmt.Sprintf("%v:%s:%s", accountId, deviceInfo, deviceId))
 }

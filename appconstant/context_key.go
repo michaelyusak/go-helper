@@ -17,6 +17,7 @@ const (
 	UserAgentKey    ContextKey = "user_agent"
 	IpAddressKey    ContextKey = "ip_adress"
 	DeviceInfokey   ContextKey = "device_info"
+	XDeviceIdKey    ContextKey = "x_device_id"
 
 	// HTTP Header Key
 	Authorization  = "Authorization"
@@ -24,4 +25,5 @@ const (
 	DeviceInfo     = "Device-Info"
 	UserAgent      = "User-Agent"
 	ClientIp       = "X-Client-IP"
+	XDeviceId      = "X-Device-Id"
 )
