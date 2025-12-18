@@ -19,5 +19,6 @@ func AuthHeadersFromContext(ctx context.Context) map[string]string {
 		appconstant.ClientIp:   ctx.Value(appconstant.IpAddressKey).(string),
 		appconstant.DeviceInfo: ctx.Value(appconstant.DeviceInfokey).(string),
 		appconstant.UserAgent:  ctx.Value(appconstant.UserAgentKey).(string),
+		appconstant.XDeviceId:  ctx.Value(appconstant.UniqueDeviceIdKey).(string),
 	}
 }
