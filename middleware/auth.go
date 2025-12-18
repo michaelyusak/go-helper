@@ -49,8 +49,8 @@ func NewAuth(opt AuthOpt) *auth {
 	}
 }
 
-func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo string) bool {
-	if ipAddress == "" || userAgent == "" || deviceInfo == "" {
+func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo, xDeviceId string) bool {
+	if ipAddress == "" || userAgent == "" || deviceInfo == "" || xDeviceId == "" {
 		return false
 	}
 
@@ -62,13 +62,11 @@ func (m *auth) checkDeviceId(c *gin.Context, ipAddress, userAgent, deviceInfo st
 		return false
 	}
 
-	deviceHash := helper.GenerateDeviceHash(ipAddress, userAgent, deviceInfo)
-
 	ctx := helper.InjectValues(c.Request.Context(), map[appconstant.ContextKey]any{
-		appconstant.DeviceHashKey: deviceHash,
 		appconstant.UserAgentKey:  userAgent,
 		appconstant.IpAddressKey:  ipAddress,
 		appconstant.DeviceInfokey: deviceInfo,
+		appconstant.XDeviceIdKey:  xDeviceId,
 	})
 
 	c.Request = c.Request.WithContext(ctx)
@@ -106,9 +104,9 @@ func (m *auth) checkToken(c *gin.Context, isCheckToken bool) *apperror.AppError 
 	if err != nil {
 		logrus.WithError(err).Error("[authMiddleware][checkToken][authEngineRestClient.ValidateToken] Error")
 		return apperror.NewAppError(apperror.AppErrorOpt{
-			Code: statusCode,
+			Code:            statusCode,
 			ResponseMessage: http.StatusText(statusCode),
-			Message: fmt.Sprintf("[authMiddleware][checkToken][authEngineRestClient.ValidateToken] Error: %v", err),
+			Message:         fmt.Sprintf("[authMiddleware][checkToken][authEngineRestClient.ValidateToken] Error: %v", err),
 		})
 	}
 
@@ -131,7 +129,7 @@ func (m *auth) Auth() func(c *gin.Context) {
 		}
 
 		if m.isCheckDeviceId {
-			passed := m.checkDeviceId(c, ipAddress, c.Request.UserAgent(), c.Request.Header.Get(appconstant.DeviceInfo))
+			passed := m.checkDeviceId(c, ipAddress, c.Request.UserAgent(), c.Request.Header.Get(appconstant.DeviceInfo), c.Request.Header.Get(appconstant.XDeviceId))
 			if !passed {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{Message: appconstant.MsgUnauthorized})
 				return
